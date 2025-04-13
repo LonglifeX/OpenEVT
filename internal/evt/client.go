@@ -17,6 +17,10 @@ type Client struct {
 }
 
 var (
+	ErrConnect        = errors.New("failed to connect to inverter")
+	ErrPoll           = errors.New("failed to poll inverter")
+	ErrAck            = errors.New("failed to ack inverter")
+	ErrReadFrame      = errors.New("failed to read frame from inverter")
 	ErrFrameDiscarded = errors.New("frame discarded")
 )
 
@@ -24,20 +28,27 @@ var (
 //
 // Call Close() to terminate the connection.
 func (c *Client) Connect() error {
+	if c.Address == "" {
+		return errors.Join(ErrConnect, fmt.Errorf("address is empty"))
+	}
+	if c.InverterID == "" {
+		return errors.Join(ErrConnect, fmt.Errorf("inverter ID is empty"))
+	}
+
 	addr, err := net.ResolveTCPAddr("tcp", c.Address)
 	if err != nil {
-		return err
+		return errors.Join(ErrConnect, err)
 	}
 
 	c.conn, err = net.DialTCP("tcp", nil, addr)
 	if err != nil {
-		return err
+		return errors.Join(ErrConnect, err)
 	}
 
 	err = c.conn.SetKeepAlive(true)
 	if err != nil {
 		c.conn.Close()
-		return err
+		return errors.Join(ErrConnect, err)
 	}
 
 	return nil
@@ -47,12 +58,12 @@ func (c *Client) Connect() error {
 func (c *Client) Poll() error {
 	poll, err := types.NewPollMessage(c.InverterID)
 	if err != nil {
-		return err
+		return errors.Join(ErrPoll, err)
 	}
 
 	_, err = c.Write(poll)
 	if err != nil {
-		return err
+		return errors.Join(ErrPoll, err)
 	}
 
 	return nil
@@ -62,12 +73,12 @@ func (c *Client) Poll() error {
 func (c *Client) Acknowledge() error {
 	ack, err := types.NewAckMessage(c.InverterID)
 	if err != nil {
-		return err
+		return errors.Join(ErrAck, err)
 	}
 
 	_, err = c.Write(ack)
 	if err != nil {
-		return err
+		return errors.Join(ErrAck, err)
 	}
 
 	return nil
@@ -80,17 +91,17 @@ func (c *Client) ReadFrame(msg *types.InverterStatus) error {
 	frame := make([]byte, 512)
 	w, err := c.Read(frame)
 	if err != nil {
-		return err
+		return errors.Join(ErrReadFrame, err)
 	}
 
 	err = msg.UnmarshalBinary(frame[0:w])
 	if err != nil {
-		return errors.Join(ErrFrameDiscarded, err)
+		return errors.Join(ErrReadFrame, ErrFrameDiscarded, err)
 	}
 
 	err = c.Acknowledge()
 	if err != nil {
-		return err
+		return errors.Join(ErrReadFrame, err)
 	}
 
 	return nil

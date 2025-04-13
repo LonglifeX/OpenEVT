@@ -46,17 +46,24 @@ For some usage info:
 
 ```shell
 $ openevt --help
-Usage of ./build/openevt:
   -addr string
         address and port of the microinverter (e.g. 192.0.2.1:14889)
+  -reconnect-interval duration
+        interval between connection attempts (e.g. 1m) (default 1m0s)
   -serial-number string
         serial number of your microinverter (e.g. 31583078)
+  -web.disable-exporter-metrics
+        exclude metrics about the exporter itself (go_*)
+  -web.listen-address string
+        address on which to expose metrics (default ":9090")
+  -web.telemetry-path string
+        path under which to expose metrics (default "/metrics")
 ```
 
 ### Finding your Inverter on the LAN
 
-To find the address and port of your inverter, connect to your the wireless
-access point of your inverter. The SSID is your inverters serial number, like
+To find the address and port of your inverter, connect to the wireless access
+point of your inverter. The SSID is the serial number of your inverter, like
 `31583078`. Once connected, login using your credentials.
 
 Under the `System` tab, the LAN IP address can be found in the `STA Mode` `IP
