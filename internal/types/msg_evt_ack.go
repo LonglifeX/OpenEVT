@@ -1,0 +1,29 @@
+package types
+
+import (
+	"encoding/hex"
+	"fmt"
+)
+
+var rawAckMessage = []byte{
+	0x36, 0x38, 0x30, 0x30, 0x31, 0x30, 0x36, 0x38, 0x31, 0x30, 0x35, 0x30,
+	0x33, 0x30, 0x35, 0x38, 0x32, 0x39, 0x33, 0x32, // inverter serial
+	0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x37, 0x38, 0x31, 0x36,
+}
+
+func NewAckMessage(sn string) ([]byte, error) {
+	id, err := hex.DecodeString(sn)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(sn) != 8 || len(id) != 4 {
+		return nil, fmt.Errorf("illegal inverter serial number: %s", sn)
+	}
+
+	msg := make([]byte, 32)
+	copy(msg, rawAckMessage)
+	copy(msg[12:20], []byte(sn))
+
+	return msg, nil
+}
