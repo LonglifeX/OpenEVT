@@ -4,14 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/brandon1024/evt-client/internal/types"
 )
 
 // Envertec EVT800 microinverter client.
 type Client struct {
-	Address    string
-	InverterID string
+	Address     string
+	InverterID  string
+	ReadTimeout time.Duration
 
 	conn *net.TCPConn
 }
@@ -86,8 +88,18 @@ func (c *Client) Acknowledge() error {
 
 // Read the next inverter status frame. Upon receipt, the message is acknowledged with 'Acknowledge()'.
 //
+// If a 'ReadTimeout' is configured on the client, ReadFrame will return an [os.ErrDeadlineExceeded] if the inverter
+// doesn't send a message after the deadline.
+//
 // May return ErrFrameDiscarded if the message from the inverter is unrecognized, which can be safely ignored.
 func (c *Client) ReadFrame(msg *types.InverterStatus) error {
+	if c.ReadTimeout != time.Duration(0) {
+		err := c.conn.SetReadDeadline(time.Now().Add(c.ReadTimeout))
+		if err != nil {
+			return errors.Join(ErrReadFrame, err)
+		}
+	}
+
 	frame := make([]byte, 512)
 	w, err := c.Read(frame)
 	if err != nil {

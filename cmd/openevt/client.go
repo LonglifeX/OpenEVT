@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"os"
 	"time"
 
 	"github.com/brandon1024/evt-client/internal/evt"
@@ -13,7 +14,9 @@ import (
 
 func inverterConnect(ctx context.Context, client *evt.Client, reconnectInverval time.Duration) error {
 	for {
-		connect(ctx, client)
+		err := connect(ctx, client)
+
+		log.Printf("INFO - connection lost to inverter %s; retrying in %s", client.InverterID, reconnectInverval.String())
 
 		tm := time.NewTimer(reconnectInverval)
 
@@ -26,6 +29,7 @@ func inverterConnect(ctx context.Context, client *evt.Client, reconnectInverval 
 		}
 	}
 }
+
 func connect(ctx context.Context, client *evt.Client) error {
 	log.Printf("INFO - opening tcp connection to inverter %s at %s", client.InverterID, client.Address)
 
@@ -58,8 +62,15 @@ func connect(ctx context.Context, client *evt.Client) error {
 		var msg types.InverterStatus
 
 		err = client.ReadFrame(&msg)
-		if err != nil && !errors.Is(err, evt.ErrFrameDiscarded) {
-			return err
+
+		// if we reached the deadline, poll
+		if errors.Is(err, os.ErrDeadlineExceeded) {
+			err = client.Poll()
+			if err != nil {
+				return err
+			}
+
+			continue
 		}
 
 		// we received something we cant parse, skip over it
@@ -67,9 +78,14 @@ func connect(ctx context.Context, client *evt.Client) error {
 			continue
 		}
 
-		log.Println("====================================================================================================")
-		log.Writer().Write([]byte(msg.String()))
-		log.Println("====================================================================================================")
+		if err != nil {
+			return err
+		}
+
+		log.Printf("DEBUG - inverter status message received [%fW %fkWh]",
+			msg.Module1.OutputPowerAC+msg.Module2.OutputPowerAC,
+			msg.Module1.TotalEnergy+msg.Module2.TotalEnergy,
+		)
 
 		prom.Update(client.Address, &msg)
 	}

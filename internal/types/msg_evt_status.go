@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"strings"
 )
 
 var (
@@ -99,31 +98,4 @@ func (s *InverterStatus) UnmarshalBinary(data []byte) error {
 	s.Module2.OutputFrequencyAC = float64(payload.Module2.OutputFrequencyAC) * 128.0 / 32768.0
 
 	return nil
-}
-
-func (i InverterStatus) String() string {
-	var b strings.Builder
-
-	b.WriteString(fmt.Sprintf("Inverter [%s] Status\n", i.InverterId))
-	b.WriteString(fmt.Sprintf(">>>>        Total Energy: %fkWh\n", i.Module1.TotalEnergy+i.Module2.TotalEnergy))
-	b.WriteString(fmt.Sprintf(">>>>       Current Power: %fW\n", i.Module1.OutputPowerAC+i.Module2.OutputPowerAC))
-	b.WriteString(i.Module1.String())
-	b.WriteString(i.Module2.String())
-
-	return b.String()
-}
-
-func (m InverterModuleStatus) String() string {
-	var b strings.Builder
-
-	b.WriteString(fmt.Sprintf("> Module [%s]\n", m.ModuleId))
-	b.WriteString(fmt.Sprintf(">>>>    Firmware Version: %s\n", m.FirmwareVersion))
-	b.WriteString(fmt.Sprintf(">>>>        Total Energy: %fkWh\n", m.TotalEnergy))
-	b.WriteString(fmt.Sprintf(">>>>    Input Voltage DC: %fV\n", m.InputVoltageDC))
-	b.WriteString(fmt.Sprintf(">>>>   Output Voltage AC: %fV\n", m.OutputVoltageAC))
-	b.WriteString(fmt.Sprintf(">>>>     Output Power AC: %fW\n", m.OutputPowerAC))
-	b.WriteString(fmt.Sprintf(">>>> Output Frequency AC: %fHz\n", m.OutputFrequencyAC))
-	b.WriteString(fmt.Sprintf(">>>>         Temperature: %f°C\n", m.Temperature))
-
-	return b.String()
 }

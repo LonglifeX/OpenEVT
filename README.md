@@ -48,6 +48,8 @@ For some usage info:
 $ openevt --help
   -addr string
         address and port of the microinverter (e.g. 192.0.2.1:14889)
+  -poll-interval duration
+        attempt to poll the inverter status more frequently than advertised
   -reconnect-interval duration
         interval between connection attempts (e.g. 1m) (default 1m0s)
   -serial-number string

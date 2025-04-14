@@ -25,6 +25,7 @@ func main() {
 
 	flag.StringVar(&client.InverterID, "serial-number", "", "serial number of your microinverter (e.g. 31583078)")
 	flag.StringVar(&client.Address, "addr", "", "address and port of the microinverter (e.g. 192.0.2.1:14889)")
+	flag.DurationVar(&client.ReadTimeout, "poll-interval", time.Duration(0), "attempt to poll the inverter status more frequently than advertised")
 	flag.DurationVar(&reconnectInverval, "reconnect-interval", time.Minute, "interval between connection attempts (e.g. 1m)")
 
 	flag.StringVar(&webListenAddress, "web.listen-address", ":9090", "address on which to expose metrics")
