@@ -10,7 +10,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/brandon1024/evt-client/internal/evt"
-	"github.com/brandon1024/evt-client/internal/prom"
+	"github.com/brandon1024/evt-client/internal/web"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 		return inverterConnect(ctx, client, reconnectInverval)
 	})
 	grp.Go(func() error {
-		return prom.ListenAndServe(ctx, webListenAddress, telemetryPath, disableExporterMetrics)
+		return web.ListenAndServe(ctx, webListenAddress, telemetryPath, disableExporterMetrics)
 	})
 
 	if err := grp.Wait(); err != nil {

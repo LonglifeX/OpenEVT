@@ -42,6 +42,24 @@ during the night.
 $ openevt --addr 192.168.2.54:14889 --serial-number 31583078
 ```
 
+To read inverter status:
+
+```shell
+$ curl localhost:8080/inverter
+```
+
+Or configure Prometheus scrape target:
+
+```yaml
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: openevt
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['openevt:9090']
+```
+
 For some usage info:
 
 ```shell

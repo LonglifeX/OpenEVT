@@ -1,6 +1,8 @@
-package prom
+package web
 
 import (
+	"sync"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
@@ -76,6 +78,25 @@ var (
 	)
 )
 
+var (
+	inverter    types.InverterStatus
+	inverterMux sync.RWMutex
+)
+
+func get() types.InverterStatus {
+	inverterMux.RLock()
+	defer inverterMux.RUnlock()
+
+	return inverter
+}
+
+func set(status types.InverterStatus) {
+	inverterMux.Lock()
+	defer inverterMux.Unlock()
+
+	inverter = status
+}
+
 func UpdateConnectionStatus(addr, sn string, status float64) {
 	labels := prometheus.Labels{
 		"addr": addr,
@@ -90,6 +111,8 @@ func Update(addr string, status *types.InverterStatus) {
 		"addr": addr,
 		"sn":   status.InverterId,
 	}
+
+	set(*status)
 
 	power.With(labels).Set(status.Module1.OutputPowerAC + status.Module2.OutputPowerAC)
 	energy.With(labels).Set(status.Module1.TotalEnergy + status.Module2.TotalEnergy)

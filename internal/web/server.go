@@ -1,7 +1,8 @@
-package prom
+package web
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -13,12 +14,16 @@ func ListenAndServe(ctx context.Context, addr, path string, disableExporterMetri
 		reg.MustRegister(collectors.NewGoCollector())
 	}
 
-	http.Handle(path, promhttp.HandlerFor(reg, promhttp.HandlerOpts{
+	mux := http.NewServeMux()
+
+	mux.Handle(path, promhttp.HandlerFor(reg, promhttp.HandlerOpts{
 		Registry: reg,
 	}))
+	mux.Handle("GET /inverter", http.HandlerFunc(GetInverter))
 
 	server := &http.Server{
-		Addr: addr,
+		Addr:    addr,
+		Handler: mux,
 	}
 
 	go func() {
@@ -27,4 +32,10 @@ func ListenAndServe(ctx context.Context, addr, path string, disableExporterMetri
 	}()
 
 	return server.ListenAndServe()
+}
+
+func GetInverter(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(get())
 }

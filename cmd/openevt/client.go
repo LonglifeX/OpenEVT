@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/brandon1024/evt-client/internal/evt"
-	"github.com/brandon1024/evt-client/internal/prom"
 	"github.com/brandon1024/evt-client/internal/types"
+	"github.com/brandon1024/evt-client/internal/web"
 )
 
 func inverterConnect(ctx context.Context, client *evt.Client, reconnectInverval time.Duration) error {
 	for {
-		err := connect(ctx, client)
+		connect(ctx, client)
 
 		log.Printf("INFO - connection lost to inverter %s; retrying in %s", client.InverterID, reconnectInverval.String())
 
@@ -43,8 +43,8 @@ func connect(ctx context.Context, client *evt.Client) error {
 
 	defer client.Close()
 
-	prom.UpdateConnectionStatus(client.Address, client.InverterID, 1.0)
-	defer prom.UpdateConnectionStatus(client.Address, client.InverterID, 0.0)
+	web.UpdateConnectionStatus(client.Address, client.InverterID, 1.0)
+	defer web.UpdateConnectionStatus(client.Address, client.InverterID, 0.0)
 
 	go func() {
 		<-ctx.Done()
@@ -87,6 +87,6 @@ func connect(ctx context.Context, client *evt.Client) error {
 			msg.Module1.TotalEnergy+msg.Module2.TotalEnergy,
 		)
 
-		prom.Update(client.Address, &msg)
+		web.Update(client.Address, &msg)
 	}
 }
