@@ -1,4 +1,4 @@
-module github.com/brandon1024/evt-client
+module github.com/brandon1024/OpenEVT
 
 go 1.24
 

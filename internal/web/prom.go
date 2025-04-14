@@ -6,7 +6,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/brandon1024/evt-client/internal/types"
+	"github.com/brandon1024/OpenEVT/internal/types"
 )
 
 var (

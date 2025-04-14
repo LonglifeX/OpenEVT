@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/brandon1024/evt-client/internal/types"
+	"github.com/brandon1024/OpenEVT/internal/types"
 )
 
 // Envertec EVT800 microinverter client.

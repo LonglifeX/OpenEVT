@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/brandon1024/evt-client/internal/evt"
-	"github.com/brandon1024/evt-client/internal/types"
-	"github.com/brandon1024/evt-client/internal/web"
+	"github.com/brandon1024/OpenEVT/internal/evt"
+	"github.com/brandon1024/OpenEVT/internal/types"
+	"github.com/brandon1024/OpenEVT/internal/web"
 )
 
 func inverterConnect(ctx context.Context, client *evt.Client, reconnectInverval time.Duration) error {

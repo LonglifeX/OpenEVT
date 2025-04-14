@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/brandon1024/evt-client/internal/evt"
-	"github.com/brandon1024/evt-client/internal/web"
+	"github.com/brandon1024/OpenEVT/internal/evt"
+	"github.com/brandon1024/OpenEVT/internal/web"
 )
 
 func main() {
