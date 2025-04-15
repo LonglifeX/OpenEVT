@@ -1,4 +1,4 @@
-# OpenEVT - Envertec EVT800 Client
+# OpenEVT ☀️ Envertec EVT800 Client ⚡
 
 Take control of your solar energy monitoring with OpenEVT!
 
@@ -13,6 +13,8 @@ to your microinverter on your LAN.
   your own private network.
 - Integration Ready: Integrate PV monitoring into Home Assistant, Grafana and
   other monitoring tools and home automation systems.
+- Improved Resolution: Poll your PV system more often with lower latency for
+  better resolution in your monitoring tools.
 
 OpenEVT is known to work with the following Envertec inverters:
 
@@ -34,9 +36,12 @@ To connect to your microinverter, you need:
 - the inverter serial number (e.g. `31583078`)
 
 Before connecting to your inverter, you must set up the inverter following the
-instructions provided by the manufacturer. The inverter enters a low-power
-standby mode when there's no sunlight, so OpenEVT won't be able to connect
-during the night.
+instructions provided by the manufacturer. The inverter must be connected to
+your LAN and must be configured in `TCP-Server` mode in the `Network
+Parameter Settings`.
+
+The inverter enters a low-power standby mode when there's no sunlight, so
+OpenEVT won't be able to connect during the night.
 
 ```shell
 $ openevt --addr 192.168.2.54:14889 --serial-number 31583078
@@ -57,10 +62,76 @@ scrape_configs:
   - job_name: openevt
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['openevt:9090']
+      - targets: ['localhost:9090']
 ```
 
-For some usage info:
+To configure Home Assistant to read from OpenEVT, add the following to
+your `configuration.yaml`:
+
+```yaml
+# Envertech Inverter Configuration
+rest:
+  - scan_interval: 15
+    resource: "http://openevt:9090/inverter"
+    method: "GET"
+    sensor:
+      - name: "Envertech Inverter [EVT-1] DC Voltage"
+        value_template: "{{ value_json.Module1.InputVoltageDC | round(2) }}"
+        unit_of_measurement: V
+        device_class: voltage
+      - name: "Envertech Inverter [EVT-1] AC Voltage"
+        value_template: "{{ value_json.Module1.OutputVoltageAC | round(2) }}"
+        unit_of_measurement: V
+        device_class: voltage
+      - name: "Envertech Inverter [EVT-1] Power"
+        value_template: "{{ value_json.Module1.OutputPowerAC | round(2) }}"
+        unit_of_measurement: W
+        device_class: power
+      - name: "Envertech Inverter [EVT-1] Frequency"
+        value_template: "{{ value_json.Module1.OutputFrequencyAC | round(2) }}"
+        unit_of_measurement: Hz
+        device_class: frequency
+      - name: "Envertech Inverter [EVT-1] Energy (Total)"
+        value_template: "{{ value_json.Module1.TotalEnergy | round(2) }}"
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total
+      - name: "Envertech Inverter [EVT-1] Temperature"
+        value_template: "{{ value_json.Module1.Temperature | round(2) }}"
+        unit_of_measurement: ℃
+        device_class: temperature
+  - scan_interval: 15
+    resource: "http://openevt-prod:9090/inverter"
+    method: "GET"
+    sensor:
+      - name: "Envertech Inverter [EVT-2] DC Voltage"
+        value_template: "{{ value_json.Module2.InputVoltageDC | round(2) }}"
+        unit_of_measurement: V
+        device_class: voltage
+      - name: "Envertech Inverter [EVT-2] AC Voltage"
+        value_template: "{{ value_json.Module2.OutputVoltageAC | round(2) }}"
+        unit_of_measurement: V
+        device_class: voltage
+      - name: "Envertech Inverter [EVT-2] Power"
+        value_template: "{{ value_json.Module2.OutputPowerAC | round(2) }}"
+        unit_of_measurement: W
+        device_class: power
+      - name: "Envertech Inverter [EVT-2] Frequency"
+        value_template: "{{ value_json.Module2.OutputFrequencyAC | round(2) }}"
+        unit_of_measurement: Hz
+        device_class: frequency
+      - name: "Envertech Inverter [EVT-2] Energy (Total)"
+        value_template: "{{ value_json.Module2.TotalEnergy | round(2) }}"
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total
+      - name: "Envertech Inverter [EVT-2] Temperature"
+        value_template: "{{ value_json.Module2.Temperature | round(2) }}"
+        unit_of_measurement: ℃
+        device_class: temperature
+```
+
+To show usage information, use the `--help` flag:
 
 ```shell
 $ openevt --help
@@ -184,6 +255,16 @@ ASCII:   68   00   10   68   10   50   32   32   32   32   00   00   00   00   7
 
 It was found that the client needs to acknowledge messages otherwise the
 inverter hangs up the connection and disconnects the client.
+
+## Acknowledgements and Mentions
+
+A special thanks to
+[Manuelimnetz](https://www.photovoltaikforum.com/thread/240683-envertech-evt800-wlan-ohne-cloude-lokal-auslesen/)
+for offering hints on how to decode messages.
+
+For a Node-Red implementation leveraging UDP mode of the inverter, see the
+implementation from
+[@alarbiere](https://flows.nodered.org/flow/ca5776ad5ea08bde1bb377007de66e11).
 
 ## License
 
