@@ -5,7 +5,10 @@ Take control of your solar energy monitoring with OpenEVT!
 OpenEVT is tool that empowers you to directly communicate with your Envertec
 solar microinverter, giving you complete ownership of your solar performance
 data - without being restricted to the Envertec APIs. OpenEVT connects directly
-to your microinverter on your LAN.
+to your microinverter on your LAN and can be used to integrate and monitor your
+inverter in Home Assistant or Prometheus.
+
+<img align="right" height="256" src="./.github/screenshots/home-assistant-portrait.png">
 
 - Improved Stability: Continue monitoring your PV performance even during an
   Envertec Cloud outage.
@@ -19,6 +22,8 @@ to your microinverter on your LAN.
 OpenEVT is known to work with the following Envertec inverters:
 
 - `EVT800B`
+
+<img src="./.github/screenshots/home-assistant-landscape.png">
 
 ## Install
 
@@ -50,7 +55,7 @@ $ openevt --addr 192.168.2.54:14889 --serial-number 31583078
 To read inverter status:
 
 ```shell
-$ curl localhost:8080/inverter
+$ curl localhost:9090/inverter
 ```
 
 Or configure Prometheus scrape target:
