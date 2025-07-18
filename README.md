@@ -1,4 +1,4 @@
-# OpenEVT ☀️ Envertec EVT800 Client ⚡
+# OpenEVT ☀️ Envertec EVT400/EVT800 Client ⚡
 
 Take control of your solar energy monitoring with OpenEVT!
 
@@ -22,6 +22,7 @@ inverter in Home Assistant or Prometheus.
 OpenEVT is known to work with the following Envertec inverters:
 
 - `EVT800B`
+- `EVT400R`
 
 <img src="./.github/screenshots/home-assistant-landscape.png">
 
