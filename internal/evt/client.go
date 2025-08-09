@@ -137,8 +137,8 @@ func (c *Client) Close() error {
 // Generate a string representation of this client.
 func (c *Client) String() string {
 	if c.conn == nil {
-		return "EVT DISCONNECTED"
+		return "DISCONNECTED"
 	}
 
-	return fmt.Sprintf("EVT CONNECTED [%s <--> %s]", c.conn.LocalAddr().String(), c.conn.RemoteAddr().String())
+	return fmt.Sprintf("CONNECTED [%s <--> %s]", c.conn.LocalAddr().String(), c.conn.RemoteAddr().String())
 }
