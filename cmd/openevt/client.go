@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -16,7 +16,10 @@ func inverterConnect(ctx context.Context, client *evt.Client, reconnectInverval 
 	for {
 		connect(ctx, client)
 
-		log.Printf("INFO - connection lost to inverter %s; retrying in %s", client.InverterID, reconnectInverval.String())
+		slog.Info("connection lost to inverter; retrying...",
+			"serial", client.InverterID,
+			"retry-interval", reconnectInverval.String(),
+		)
 
 		tm := time.NewTimer(reconnectInverval)
 
@@ -31,7 +34,7 @@ func inverterConnect(ctx context.Context, client *evt.Client, reconnectInverval 
 }
 
 func connect(ctx context.Context, client *evt.Client) error {
-	log.Printf("INFO - opening tcp connection to inverter %s at %s", client.InverterID, client.Address)
+	slog.Info("opening tcp connection to inverter", "serial", client.InverterID, "address", client.Address)
 
 	// Connect to the inverter
 	err := client.Connect()
@@ -39,7 +42,7 @@ func connect(ctx context.Context, client *evt.Client) error {
 		return err
 	}
 
-	log.Printf("INFO - connection established [%s]", client.String())
+	slog.Info("connection established", "status", client.String())
 
 	defer client.Close()
 
@@ -82,9 +85,9 @@ func connect(ctx context.Context, client *evt.Client) error {
 			return err
 		}
 
-		log.Printf("DEBUG - inverter status message received [%fW %fkWh]",
-			msg.Module1.OutputPowerAC+msg.Module2.OutputPowerAC,
-			msg.Module1.TotalEnergy+msg.Module2.TotalEnergy,
+		slog.Debug("inverter status message received",
+			"power-ac", msg.Module1.OutputPowerAC+msg.Module2.OutputPowerAC,
+			"total-energy", msg.Module1.TotalEnergy+msg.Module2.TotalEnergy,
 		)
 
 		web.Update(client.Address, &msg)

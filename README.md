@@ -141,8 +141,11 @@ To show usage information, use the `--help` flag:
 
 ```shell
 $ openevt --help
+Usage of openevt:
   -addr string
         address and port of the microinverter (e.g. 192.0.2.1:14889)
+  -log.level value
+        log level (e.g. debug, info, warn, error) (default INFO)
   -poll-interval duration
         attempt to poll the inverter status more frequently than advertised
   -reconnect-interval duration

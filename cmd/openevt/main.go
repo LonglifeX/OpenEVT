@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
@@ -23,6 +23,14 @@ func main() {
 
 	client := &evt.Client{}
 
+	// setup logging
+	loggerLevel := new(slog.LevelVar)
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: loggerLevel,
+	}))
+	slog.SetDefault(logger)
+
+	// define flags
 	flag.StringVar(&client.InverterID, "serial-number", "", "serial number of your microinverter (e.g. 31583078)")
 	flag.StringVar(&client.Address, "addr", "", "address and port of the microinverter (e.g. 192.0.2.1:14889)")
 	flag.DurationVar(&client.ReadTimeout, "poll-interval", time.Duration(0), "attempt to poll the inverter status more frequently than advertised")
@@ -32,8 +40,11 @@ func main() {
 	flag.StringVar(&telemetryPath, "web.telemetry-path", "/metrics", "path under which to expose metrics")
 	flag.BoolVar(&disableExporterMetrics, "web.disable-exporter-metrics", false, "exclude metrics about the exporter itself (go_*)")
 
+	flag.TextVar(loggerLevel, "log.level", new(slog.LevelVar), "log level (e.g. debug, info, warn, error)")
+
 	flag.Parse()
 
+	// launch
 	grp, ctx := errgroup.WithContext(context.Background())
 	grp.Go(func() error {
 		return inverterConnect(ctx, client, reconnectInverval)
@@ -43,7 +54,7 @@ func main() {
 	})
 
 	if err := grp.Wait(); err != nil {
-		fmt.Printf("ERROR - %v\n", err)
+		slog.Error("error caught - shutting down", "err", err)
 		os.Exit(1)
 	}
 }
